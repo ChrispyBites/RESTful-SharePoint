@@ -58,6 +58,7 @@ Query a list for data. This function requires an options object formatted thusly
 	}
 
 **Available Operations**
+
 |Operation|Description|
 |---------|-----------|
 |`All`|Returns everything about the list.|
