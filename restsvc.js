@@ -40,64 +40,39 @@ restObject.prototype.del = function(relativeUrl){
 	var executeOptions={url:fullUrl,method:"POST",headers:{'X-RequestDigest':$("#__REQUESTDIGEST").val(),"X-HTTP-Method": "DELETE","If-Match": "*"}}
 	return $.ajax(executeOptions);
 }
-/********************************************************************************************************************/
-/*	#OPS																											*/
-/*		These are the actual operations.  This section is split into subsections for each API:						*/
-/*			- #LIST: Work with lists and list items.																*/
-/*			- #FILE: Work with files, folders, and libraries.														*/
-/*			- #FIELD: Work with fields.																				*/
-/*			- #USER: Work with site users, groups, and roles														*/
-/*			- #PROF: Work with the user profile service.															*/
-/*			- #WEB: Work with websites.																				*/
-/*			- #SOCIAL: Work with the social service.																*/
-/*			- #SEARCH: Search REST API calls.																		*/
-/*																													*/
-/********************************************************************************************************************/
 
-/*#LIST*/
-
-//	Get a list of all the lists at the target web site.
-//		By default, this is going to give you just the title and guid for the lists.  Use getListData to get more
-//		information about a specific list.  
-//
-//		This operation takes no parameters.
-/*
+//A list of lists on the site.
 restObject.prototype.getLists = function(){
 	var executeUrl = '/web/lists';
-	
+	return this.execute(executeUrl).then(function(data){
+		if(data.d){
+			return data.d
+		}else{
+			//Someone help me figure out how to carry these errors out of here and back into whatever context you're calling this from.
+			throw "Something bad happened..."
+		}
+	});
 }
-/*	
-Query a list for data. This function requires an options object formatted thusly:
-	- list: A string value for the actual list 
-	- op: The operations you're performing.  Right now we can do eight operations:
-		* 'All': Returns all information about the list itself.
-		* 'Fields': List fields.
-		* 'Items': List items.
-		* 'ContentTypes': Content types configured for the list.
-		* 'Forms': The forms the list uses.
-		* 'Views': Views configured for the list.
-		* 'WorkflowAssociations': Any workflows directly associated with the list.
-		* 'Id': Returns the Guid. (Not filterable or selectable).
-	- ItemId (optional): The ID of the specific item you want returned.
-	- params (optional): An object containing the parameters 
-		* select (optional): An array of fields you'd like the query to return.
-		* filter (optional): An OData compliant filter expression to apply to the query.
-		* expand (optional): Used if any fields you are returning are lookups, people pickers, or managed metadata.  
-								Note: For every field you expand, you must also select that field and the appropriate child field, like this:
-								'Category/Title'.  If you filter on this field, you will need to format the filter expression similarly.
-	- top (optional): The total number of items to return.  If you pass nothing, the value is
-	arbitrarily set to 10,000 to return everything.
-If you need to pass additional parameters in, you will need to directly edit this function to include them.
-The only operations that accept parameters are Fields and Items. If that needs to change down the road, I'll fix it.
-*/
 
+//Data about or within a specific list.
 restObject.prototype.getListData = function(options){
-	//Set the base endpoint Url.
 	var executeUrl = "/web/lists/getByTitle('"+options.list+"')";
-
-	//The first two ops are super basic, so we'll collapse them into a single line.
-	if(options.op == 'All'){return this.execute(executeUrl).then(function(data){if(data.d){return data.d;}else{throw "Something bad happened..."}});
-	}else if(options.op == 'Id'){executeUrl+='/Id';return this.execute(executeUrl).then(function(data){if(data.d){return data.d.Id;}else{throw "Something bad happened..."}});
+	if(options.op == 'All'){
+		return this.execute(executeUrl).then(function(data){
+			if(data.d){
+				return data.d;
+			}else{
+				throw "Something bad happened..."
+			}
+		});
+	}else if(options.op == 'Id'){
+		executeUrl+='/Id';return this.execute(executeUrl).then(function(data){
+			if(data.d){
+				return data.d.Id;
+			}else{
+				throw "Something bad happened..."
+			}
+		});
 	}else if(options.op == 'Forms' || options.op == 'Views' || options.op == 'WorkflowAssociations'){
 		executeUrl+=options.op;
 		return this.execute(executeUrl).then(function(data){
@@ -108,21 +83,29 @@ restObject.prototype.getListData = function(options){
 			}
 		});
 	}else{
-		if(options.ItemId){executeUrl+='/items('+options.ItemId+')';return this.execute(executeUrl).then(function(data){if(data.d){return data.d}})}
-		else{executeUrl+='/items';}
-		//If there's a parameter object, then add the dollar signs, turn it into a string, and add it to the URI.
+		if(options.ItemId){
+			executeUrl+='/items('+options.ItemId+')';
+			return this.execute(executeUrl).then(function(data){
+				if(data.d){
+					return data.d;
+				}
+			});
+		}else{
+			executeUrl+='/items';
+		}
 		if(options.params){
-			params = options.params;
+			params=options.params;
 			var key;
 			for(key in params){
-				//This if/else is necessary if you're batching a bunch of list calls at once. 
-				//Without it, the parameters accrue dollar signs like an MCU film.
-				//Let's hope that's still a relevant pop culture reference...			
-				if(params.hasOwnProperty(key) && key.indexOf('$') === -1){params['$'+key] = params[key];delete params[key];}
-				else{params[key] = params[key]}
+				//This if/else is necessary if you're batching a bunch of list calls at once. Without it, the parameters accrue dollar signs like an MCU film. Let's hope that's still a relevant pop culture reference by the time anyone sees this.			
+				if(params.hasOwnProperty(key) && key.indexOf('$') === -1){
+					params['$'+key] = params[key];
+					delete params[key];
+				}else{
+					params[key] = params[key]
+				}
 			}
-
-			queryString = decodeURIComponent($.param(params));
+			queryString=decodeURIComponent($.param(params));
 			executeUrl+='?'+queryString;
 		}
 		return this.execute(executeUrl).then(function(data){
@@ -135,20 +118,19 @@ restObject.prototype.getListData = function(options){
 	}
 }
 
-
-//Data shape is a little different for a single list item, which necessitates a slightly different return.
-restObject.prototype.getListItem = function(list,id,params){
-	//Set the base endpoint Url.
+//Data on a specific list item.  Return shape is a little different; this necessitates a slightly different return.
+restObject.prototype.getListItem=function(list,id,params){
 	var executeUrl = "/web/lists/getByTitle('"+list+"')/Items("+id+")";
-
-	//If there's a parameter object, then add the dollar signs, turn it into a string, and add it to the URI.
 	if(params){
 		var key;
 		for(key in params){
-			//This if/else is necessary if you're batching a bunch of list calls at once. 
-			//Without it, the parameters accrue dollar signs like a Kanye album... we all know this one's the greenest meme there is.
-			if(params.hasOwnProperty(key) && key.indexOf('$') === -1){params['$'+key] = params[key];delete params[key];}
-			else{params[key] = params[key]}
+			//This if/else is necessary if you're batching a bunch of list calls at once. Without it, the parameters accrue dollar signs like a Kanye album... we all know this one's the greenest meme there is.  I should probably turn this into a utility function.
+			if(params.hasOwnProperty(key) && key.indexOf('$') === -1){
+				params['$'+key] = params[key];
+				delete params[key];
+			}else{
+				params[key] = params[key]
+			}
 		}
 		queryString = decodeURIComponent($.param(params));
 		executeUrl+='?'+queryString;
@@ -162,7 +144,7 @@ restObject.prototype.getListItem = function(list,id,params){
 	});
 }
 
-// Adds a list item to a list.  Parameters include a list name and a fields regular object.
+// Adds an item to a list.  Parameters include a list name and a fields regular object.
 // The fields object needs to include a property for at *least* each required field in the list.  
 // Note that lookups, MM, and PP fields require special handling that I'm not super clear on, yet.
 restObject.prototype.addListItem = function(list,fields){
