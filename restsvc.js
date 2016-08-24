@@ -144,9 +144,7 @@ restObject.prototype.getListItem=function(list,id,params){
 	});
 }
 
-// Adds an item to a list.  Parameters include a list name and a fields regular object.
-// The fields object needs to include a property for at *least* each required field in the list.  
-// Note that lookups, MM, and PP fields require special handling that I'm not super clear on, yet.
+// Adds an item to a list.
 restObject.prototype.addListItem = function(list,fields){
 	var url = "/web/lists/getbytitle('"+list+"')/items";
 	var type = getType(list);				//Builds the content type internal name and passes it to the HTTP request body.
@@ -159,16 +157,14 @@ restObject.prototype.addListItem = function(list,fields){
 	var method = 'POST';
 	return this.post(url,body,method).then(function(response){
 		if(response.d){
-			return response.d;					//Do something with this on the page; I usually display some sort of "Thanks for your submission" text or alert or something.
+			return response.d;				//Do something with this on the page; I usually display some sort of "Thanks for your submission" text or alert or something.
 		}else{
 			throw false;
 		}
 	});
 }
 
-//Updates an existing item.  The Fields object must contain the ID of the item you're updating.  Otherwise,
-//this operation is virtually the same as the addListItem operation.
-
+//Updates an existing item.
 restObject.prototype.updateListItem = function(list,fields){
 	var url = "/web/lists/getbytitle('"+list+"')/items("+fields.ID+")";
 	var type = getType(list);				//Builds the content type internal name and passes it to the HTTP request body.
@@ -189,15 +185,7 @@ restObject.prototype.deleteListItem = function(list,id){
 
 /*#FILE*/
 
-//Get a list of files, given a document library and a folder.  The options object needs to be formatted as follows:
-// - options.library = The Title of the library (so, 'Shared Documents' not 'Shared%20Documents').
-// - options.folders = An array containing the folder path you want to enumerate files for.  The function will expect
-//   the array to be in the hierarchical order of the folders on the site.  i.e., ['Folder A','Folder B'] will be assumed to be Folder A/Folder B.
-// - options.files = A boolean indicating whether the function should get files (true) or folders (false)
-
-// Note, that this function is not intended to return contents from multiple folder locations.  You'll need to do that via promises and
-// multiple calls.
-
+//Get a list of files from a document library/folder.
 restObject.prototype.getFilesFromFolder = function(options){
 	var files = [];
 	var endpoint = '/web/getfolderbyserverrelativeurl';

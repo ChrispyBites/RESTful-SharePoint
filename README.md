@@ -1,7 +1,9 @@
 # RESTful SharePoint
 A library of jquery and javascript functions used to make life with the REST APIs a little easier.
 
-This library attempts to abstract usage of SharePoint's REST API and will assist you in interacting with SharePoint objects outside the context of SP's UI (i.e., forms, etc.).  This library requires the jQuery library (tested with at least 1.11.2) and the underscore library (for the time being).	
+This library attempts to abstract usage of SharePoint's REST API and will assist you in interacting with SharePoint objects outside the context of SP's UI (i.e., forms, etc.).  This library requires the jQuery library (tested with at least 1.11.2) and the underscore library (for the time being).
+
+Unless otherwise indicated, all functions return an array of JSON objects that correspond to whatever you asked for. 
 
 There are three main sections:
     MAIN - All of the primary functions that make everything else go.
@@ -31,7 +33,7 @@ These are the actual operations.  This section is split into subsections for eac
 * FILE: Work with files, folders, and libraries.
 * FIELD: Work with fields.
 * USER: Work with site users, groups, and roles.
-* PROF: Work with the user profile service.	
+* PROFILE: Work with the user profile service.	
 * WEB: Work with websites.		
 * SOCIAL: Work with the social service.
 * SEARCH: Search REST API calls.
@@ -91,4 +93,77 @@ Updates an existing list item.  Same parameters as *addListItem*, with one cavea
 This should be self explanatory.  Pass in the list's display name and an ID, both as strings.  If I remember correctly, you don't get anything at all back.  Eff you, Microsoft.
 
 ###FILE
-The file endpoints are kind of strange and I'm still working out how they work, exactly.  There's a lot of potential, though, for some powerful stuff.  
+The file endpoints are kind of strange and I'm still working out how they work, exactly.  There's a lot of potential, though, for some powerful stuff.
+
+####getFilesFromFolder
+Gets a list of files, given a document library and a folder.  The options object needs to be formatted as follows:
+    {
+		'library' : The display name of the library.
+		'folders' : An array containing the folder path you want to grab files from.  The function will expect the array to be in the hierarchical order of the folders on the site.  For example, ['Folder A','Folder B'] will be assumed to be Folder A/Folder B.
+		'files' : A boolean value indicating the function should get files (true) or folders (false)
+	}
+
+###FIELD
+Most of these functions will deal with creating, removing, or changing fields on lists.  I'm unclear how this impacts site columns.
+
+####getFieldChoices
+This is used to get the available choices for a regular choice field (i.e., not a people picker, lookup, or managed metadata field).  It takes two parameters: the display name of the list and the GUID of the field in question.  I probably need to change this to work off of the display name of the field, but meh.
+
+####addNewChoices
+Adds a new choice to a choice field's list of choices, and it takes three parameters: the list name, the field guid, and an array for the choices.  The title of this function is kind of a misnomer, as what you're really doing is updating the choices list.  This is super important to remember, because if you don't want to screw up the existing list of choices, you'll need to create an array of the original list of choices (see *getFieldChoices*) and append your new choice to the end of that array.  I'm sure some day I (or some enterprising contributor) will leverage *getFieldChoices* to do this for you.  I'm lazy bruh.
+
+###USER
+This is a distinct endpoint from the user profile service endpoints.  These deal with the user information list (UIL) and groups and permissions at a site.
+
+####getUsersFromGroup
+Grabs all the users in the specified group.  Only takes a single parameter, the group's name.
+
+####ensureUser
+Given a `username`, including claims encoding (if that's what your organization gets into), this will add a user to the UIL and return to you that user's ID in the UIL.  Fantastically useful for making custom people pickers work.
+
+###PROFILE 
+These functions are used to manipulate or read user profile properties.  Most of the functions will use the same endpoint over and over again, I'm just formatting the output for some specific needs.  YMMV with these, as everyone's profile properties are called different things and mapped differently.  If you bring this to your organization, you'll probably want to see how I formatted the return objects and make sure they're sending you stuff you want.
+
+####getMyOrgStructure
+This one takes no parameter, and returns an array containing four objects: me, managers, peers, and reports.  Managers, peers, and reports are just an array of account IDs (LAN IDs in my company's case) that correspond to those groups of people relative to the current user.  Me contains the following information about the current user:
+* Account ID
+* Display name
+* Job Title
+* Picture URL
+* MySite URL
+* Email address
+
+####getOrgStructure
+This returns the exact same array of objects as *getMyOrgStructure*, but for the individual (using their account ID) specified as a parameter.
+
+####getUserProperties
+Takes a single parameter, the account ID, and returns an object with four properties: the user's display name, job title (I think...), email address, and an array of key/value pairs for every user profile property you might have banging around.
+
+###WEB
+
+####getSubsites
+
+###SOCIAL
+
+####getUnreadCount
+
+###SEARCH
+
+####searchUsers
+
+####serachResultSource
+
+####searchQuery
+
+###UTILS
+
+####QueryResults
+
+####SearchResults
+
+####convertRowsToObjects
+
+####getType
+
+####ExceptionMsg
+
