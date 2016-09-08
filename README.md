@@ -45,6 +45,7 @@ Get a list of all the lists at the target web site.  By default, this is going t
 
 ####getListData
 Query a list for data. This function requires an options object formatted thusly:
+```
 	{
 		list : A string value for the list's display name (not it's URL).
 		op : The operation you're performing.  I have eight different operations configured for this function, listed below the example object.
@@ -58,6 +59,7 @@ Query a list for data. This function requires an options object formatted thusly
 				expand : Used if any fields are lookups, people pickers, or managed metadata.  Any expanded field must also be included in the select array, pathed to the child field you're looking for.  For example: 'Category/Title'.
 			} 
 	}
+```
 
 **Available Operations**
 
