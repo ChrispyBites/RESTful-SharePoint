@@ -10,7 +10,7 @@ There are three main sections:
     OPS	- The actual REST operations themselves.
     UTIL - Utility functions that format responses or do other calcs.
 
-##MAIN
+## MAIN
 
 The functions in this section set up functionality for the rest of the library.  Currently we have:
 	
@@ -28,7 +28,7 @@ The primary POST function sends a POST call through AJAX.  If you write new POST
 
 There is a secondary POST function used to handle delete requests; headers are formatted just differently enough that I felt like it needed it's own AJAX function.
 
-##OPS											
+## OPS											
 
 These are the actual operations.  This section is split into subsections for each API:						
 * LIST: Work with lists and list items.
@@ -40,13 +40,13 @@ These are the actual operations.  This section is split into subsections for eac
 * SOCIAL: Work with the social service.
 * SEARCH: Search REST API calls.
 
-###LIST
+### LIST
 
-####getLists
+#### getLists
 
 Get a list of all the lists at the target web site.  By default, this is going to give you just the title and guid for the lists.  Use getListData to get more information about a specific list.  This operation takes no parameters.
 
-####getListData
+#### getListData
 
 Query a list for data. This function requires an options object formatted thusly:
 ```
@@ -79,14 +79,14 @@ Query a list for data. This function requires an options object formatted thusly
 
 If you need to pass additional parameters in, you will need to directly edit this function to include them.  The only operations that accept parameters are Fields and Items. If that needs to change down the road, I'll fix it.
 
-####getListItem
+#### getListItem
 
 Gets all data on a single list item.  It takes three parameters:
 * `list` : The list's display name.
 * `id` : The ID of the list item you want returned.
 * `params` : An object, structured the same as the one used in *getListData*, but without the filter parameter.
 
-####addListItem
+#### addListItem
 
 Adds a new item to a list.  This operation takes a two parameters:
 * `list` : The list's display name.
@@ -94,19 +94,19 @@ Adds a new item to a list.  This operation takes a two parameters:
 
 Note that your return value is the new list item, which you can use for some super nice UX things because you're decent to your users.
 
-####updateListItem
+#### updateListItem
 
 Updates an existing list item.  Same parameters as *addListItem*, with one caveat: the fields object *must* contain the ID of the item you're updating, otherwise you'll just add a new item to the list.  I believe the return value is an HTTP code, like 200 for a successful update.  I don't really remember. Same basic rules apply, though.  Help your users out and let them know something successful happened.
 
-####deleteListItem
+#### deleteListItem
 
 This should be self explanatory.  Pass in the list's display name and an ID, both as strings.  If I remember correctly, you don't get anything at all back.  Eff you, Microsoft.
 
-###FILE
+### FILE
 
 The file endpoints are kind of strange and I'm still working out how they work, exactly.  There's a lot of potential, though, for some powerful stuff.
 
-####getFilesFromFolder
+#### getFilesFromFolder
 
 Gets a list of files, given a document library and a folder.  The options object needs to be formatted as follows:
     {
@@ -115,35 +115,35 @@ Gets a list of files, given a document library and a folder.  The options object
 		'files' : A boolean value indicating the function should get files (true) or folders (false)
 	}
 
-###FIELD
+### FIELD
 
 Most of these functions will deal with creating, removing, or changing fields on lists.  I'm unclear how this impacts site columns.
 
-####getFieldChoices
+#### getFieldChoices
 
 This is used to get the available choices for a regular choice field (i.e., not a people picker, lookup, or managed metadata field).  It takes two parameters: the display name of the list and the GUID of the field in question.  I probably need to change this to work off of the display name of the field, but meh.
 
-####addNewChoices
+#### addNewChoices
 
 Adds a new choice to a choice field's list of choices, and it takes three parameters: the list name, the field guid, and an array for the choices.  The title of this function is kind of a misnomer, as what you're really doing is updating the choices list.  This is super important to remember, because if you don't want to screw up the existing list of choices, you'll need to create an array of the original list of choices (see *getFieldChoices*) and append your new choice to the end of that array.  I'm sure some day I (or some enterprising contributor) will leverage *getFieldChoices* to do this for you.  I'm lazy bruh.
 
-###USER
+### USER
 
 This is a distinct endpoint from the user profile service endpoints.  These deal with the user information list (UIL) and groups and permissions at a site.
 
-####getUsersFromGroup
+#### getUsersFromGroup
 
 Grabs all the users in the specified group.  Only takes a single parameter, the group's name.
 
-####ensureUser
+#### ensureUser
 
 Given a `username`, including claims encoding (if that's what your organization gets into), this will add a user to the UIL and return to you that user's ID in the UIL.  Fantastically useful for making custom people pickers work.
 
-###PROFILE 
+### PROFILE 
 
 These functions are used to manipulate or read user profile properties.  Most of the functions will use the same endpoint over and over again, I'm just formatting the output for some specific needs.  YMMV with these, as everyone's profile properties are called different things and mapped differently.  If you bring this to your organization, you'll probably want to see how I formatted the return objects and make sure they're sending you stuff you want.
 
-####getMyOrgStructure
+#### getMyOrgStructure
 
 This one takes no parameter, and returns an array containing four objects: me, managers, peers, and reports.  Managers, peers, and reports are just an array of account IDs (LAN IDs in my company's case) that correspond to those groups of people relative to the current user.  Me contains the following information about the current user:
 * Account ID
@@ -153,39 +153,39 @@ This one takes no parameter, and returns an array containing four objects: me, m
 * MySite URL
 * Email address
 
-####getOrgStructure
+#### getOrgStructure
 
 This returns the exact same array of objects as *getMyOrgStructure*, but for the individual (using their account ID) specified as a parameter.
 
-####getUserProperties
+#### getUserProperties
 
 Takes a single parameter, the account ID, and returns an object with four properties: the user's display name, job title (I think...), email address, and an array of key/value pairs for every user profile property you might have banging around.
 
-###WEB
+### WEB
 
-####getSubsites
+#### getSubsites
 
-###SOCIAL
+### SOCIAL
 
-####getUnreadCount
+#### getUnreadCount
 
-###SEARCH
+### SEARCH
 
-####searchUsers
+#### searchUsers
 
-####serachResultSource
+#### serachResultSource
 
-####searchQuery
+#### searchQuery
 
-###UTILS
+### UTILS
 
-####QueryResults
+#### QueryResults
 
-####SearchResults
+#### SearchResults
 
-####convertRowsToObjects
+#### convertRowsToObjects
 
-####getType
+#### getType
 
-####ExceptionMsg
+#### ExceptionMsg
 
